@@ -1,0 +1,57 @@
+# Python
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales
+
+venv/
+env/
+.venv/
+
+# Variables de entorno (MUY IMPORTANTE)
+
+.env
+
+# Archivos de Flask
+
+instance/
+.webassets-cache
+
+# Logs
+
+*.log
+
+# Base de datos
+
+*.db
+*.sqlite3
+
+# VS Code / IDEs
+
+.vscode/
+.idea/
+
+# Mac / Linux
+
+.DS_Store
+
+# Archivos temporales
+
+*.tmp
+*.swp
+
+# Archivos de build
+
+build/
+dist/
+
+# Archivos de testing
+
+.pytest_cache/
+.coverage
+
+# Node (por si añades frontend)
+
+node_modules/

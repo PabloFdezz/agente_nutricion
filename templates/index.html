@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asesor Nutricional Personal</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #219150;
+        }
+        #plan {
+            margin-top: 20px;
+            padding: 20px;
+            border-left: 4px solid #27ae60;
+            background-color: #f8f9fa;
+            display: none;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Asesor Nutricional Personal</h1>
+        <form id="nutricionForm">
+            <div class="form-group">
+                <label for="edad">Edad:</label>
+                <input type="number" id="edad" name="edad" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="peso">Peso (kg):</label>
+                <input type="number" id="peso" name="peso" step="0.1" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="altura">Altura (cm):</label>
+                <input type="number" id="altura" name="altura" step="0.1" min="30" required>
+            </div>
+            <div class="form-group">
+                <label for="genero">Sexo:</label>
+                <select id="genero" name="sexo" required>
+                    <option value="">Selecciona tu sexo biológico</option>
+                    <option value="Hombre">Hombre</option>
+                    <option value="Mujer">Mujer</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="nivel_actividad">Nivel de Actividad:</label>
+                <select id="nivel_actividad" name="nivel_actividad" required>
+                    <option value="">Selecciona tu nivel</option>
+                    {% for value, label in niveles_actividad %}
+                    <option value="{{ label }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="comidas_favoritas">Comidas Favoritas:</label>
+                <textarea id="comidas_favoritas" name="comidas_favoritas" placeholder="Ej: pasta, pollo, ensaladas..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="restricciones">Restricciones Dietéticas o Alergias (opcional):</label>
+                <textarea id="restricciones" name="restricciones" placeholder="Ej: sin gluten, alergia a frutos secos..."></textarea>
+            </div>
+            <button type="submit">Generar Plan Nutricional</button>
+        </form>
+        <div class="loading">Generando tu plan nutricional...</div>
+        <div id="plan"></div>
+    </div>
+
+    <script>
+        document.getElementById('nutricionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const loading = document.querySelector('.loading');
+            const planDiv = document.getElementById('plan');
+
+            loading.style.display = 'block';
+            planDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/nutricion', {
+                    method: 'POST',
+                    body: new FormData(form)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    planDiv.innerHTML = data.plan.replace(/\n/g, '<br>');
+                    planDiv.style.display = 'block';
+                } else {
+                    planDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                    planDiv.style.display = 'block';
+                }
+            } catch (error) {
+                planDiv.innerHTML = `<div class="error">Ocurrió un error. Por favor, intenta de nuevo.</div>`;
+                planDiv.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
