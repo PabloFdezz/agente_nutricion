@@ -105,8 +105,17 @@
                 <select id="nivel_actividad" name="nivel_actividad" required>
                     <option value="">Selecciona tu nivel</option>
                     {% for value, label in niveles_actividad %}
-                    <option value="{{ label }}">{{ label }}</option>
+                    <option value="{{ value }}">{{ label }}</option>
                     {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="objetivo">Objetivo:</label>
+                <select id="objetivo" name="objetivo" required>
+                    <option value="">Selecciona tu objetivo</option>
+                    <option value="mantenimiento">Mantener peso</option>
+                    <option value="definicion">Perder grasa</option>
+                    <option value="musculo">Ganar músculo</option>
                 </select>
             </div>
             <div class="form-group">

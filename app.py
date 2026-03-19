@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 import logging
+import json
 
 # Cargar variables de entorno (incluye la API KEY de Groq)
 load_dotenv()
@@ -28,6 +29,14 @@ def index():
     return render_template("index.html", niveles_actividad=niveles_actividad)
 
 def validar_formulario(request):
+
+    if not all([
+        request.form.get("edad"),
+        request.form.get("peso"),
+        request.form.get("altura")
+    ]):
+        return None, "Faltan campos obligatorios"
+
     try:
         edad = int(request.form.get("edad"))
         peso = float(request.form.get("peso"))
@@ -98,12 +107,18 @@ def nutricion():
 
     datos, error = validar_formulario(request)
 
+    if error:
+        return jsonify({
+            "success": False,
+            "error": error
+        })
+
     calorias = calcular_calorias(
-    datos["edad"],
-    datos["peso"],
-    datos["altura"],
-    datos["sexo"],
-    datos["nivel_actividad"]
+        datos["edad"],
+        datos["peso"],
+        datos["altura"],
+        datos["sexo"],
+        datos["nivel_actividad"]
     )
 
     proteinas, grasas, carbs = calcular_macros(calorias)
@@ -115,32 +130,62 @@ def nutricion():
         })
 
     prompt = f"""
-    Genera directamente un plan nutricional en español para la siguiente persona:
+    Genera un plan nutricional en español para la siguiente persona.
 
-    Edad: {datos['edad']} años
-    Peso: {datos['peso']} kg
-    Altura: {datos['altura']} cm
-    Sexo: {datos['sexo']}
-    Nivel de Actividad: {datos['nivel_actividad_desc']}
-    Comidas Favoritas: {datos['comidas_favoritas']}
-    Restricciones Dietéticas/Alergias: {datos['restricciones']}
+    Datos:
+    - Edad: {datos['edad']}
+    - Peso: {datos['peso']}
+    - Altura: {datos['altura']}
+    - Sexo: {datos['sexo']}
+    - Nivel de actividad: {datos['nivel_actividad_desc']}
+    - Comidas favoritas: {datos['comidas_favoritas']}
+    - Restricciones: {datos['restricciones']}
 
-    Necesidades calóricas estimadas (calculadas previamente): {calorias} kcal
-
-    Distribución base de macronutrientes:
+    Calorías objetivo (ya calculadas): {calorias} kcal
+    Macronutrientes base (ya calculados):
     - Proteínas: {proteinas} g
     - Grasas: {grasas} g
     - Carbohidratos: {carbs} g
 
     IMPORTANTE:
-    - Usa estas calorías y macronutrientes como base (no los recalcules).
-    - No muestres razonamiento interno.
+    - Usa estos valores como base (no los recalcules)
+    - No des explicaciones fuera del JSON
+    - Responde SOLO en JSON válido
+
+    Devuelve exactamente este formato:
+
+    {{
+    "calorias": {calorias},
+    "macros": {{
+        "proteinas": {proteinas},
+        "grasas": {grasas},
+        "carbohidratos": {carbs}
+    }},
+    "menu_diario": {{
+        "desayuno": "...",
+        "comida": "...",
+        "cena": "..."
+    }},
+    "snacks": ["...", "..."],
+    "recomendaciones": ["...", "..."],
+    "consideraciones": ["...", "..."],
+    "alternativas": ["...", "..."]
+    }}
     """
 
     try:
         completion = client.chat.completions.create(
             messages=[
-                {"role": "system", "content": "Eres un nutricionista profesional..."},
+                {"role": "system", 
+                 "content": """Eres un nutricionista profesional.
+                 Responde siempre en español.
+                 Da recomendaciones seguras, prácticas y realistas.
+                 No hagas recomendaciones extremas ni peligrosas.
+                 No inventes datos médicos.
+                 Adapta el plan a la persona.
+
+                Devuelve siempre respuestas en formato JSON válido, sin texto adicional."""
+                },
                 {"role": "user", "content": prompt}
             ],
             model="qwen/qwen3-32b",
@@ -150,9 +195,18 @@ def nutricion():
 
         respuesta = completion.choices[0].message.content
 
+        try:
+            plan_json = json.loads(respuesta)
+        except json.JSONDecodeError:
+            logging.error("La IA no devolvió JSON válido")
+            return jsonify({
+                "success": False,
+                "error": "Error procesando la respuesta del modelo"
+            })
+
         return jsonify({
             "success": True,
-            "plan": respuesta
+            "plan": plan_json
         })
 
     except Exception as e:

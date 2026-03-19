@@ -10,11 +10,12 @@ venv/
 env/
 .venv/
 
-# Variables de entorno (MUY IMPORTANTE)
+# Variables de entorno
 
 .env
+.env.*
 
-# Archivos de Flask
+# Flask
 
 instance/
 .webassets-cache
@@ -23,35 +24,35 @@ instance/
 
 *.log
 
-# Base de datos
+# Bases de datos
 
 *.db
 *.sqlite3
 
-# VS Code / IDEs
+# IDEs
 
 .vscode/
 .idea/
 
-# Mac / Linux
+# Sistema
 
 .DS_Store
 
-# Archivos temporales
+# Temporales
 
 *.tmp
 *.swp
 
-# Archivos de build
+# Build
 
 build/
 dist/
 
-# Archivos de testing
+# Testing
 
 .pytest_cache/
 .coverage
 
-# Node (por si añades frontend)
+# Node (si añades frontend)
 
 node_modules/
