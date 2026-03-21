@@ -163,12 +163,12 @@ objetivo=musculo
 
 ---
 
-## 👨‍💻 Autor
+## Autor
 
 Pablo Fernández
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto es de uso educativo y personal.
