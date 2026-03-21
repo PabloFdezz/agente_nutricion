@@ -74,6 +74,18 @@
             margin-top: 20px;
             display: none;
         }
+
+        #plan h2 {
+            color: #27ae60;
+        }
+
+        #plan ul {
+            padding-left: 20px;
+        }
+
+        #plan li {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -149,14 +161,55 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    planDiv.innerHTML = data.plan.replace(/\n/g, '<br>');
+                    const plan = data.plan;
+
+                    const menu = Array.isArray(plan.menu) ? plan.menu : ["No disponible"];
+                    const snacks = Array.isArray(plan.snacks) ? plan.snacks : [];
+                    const recomendaciones = plan.recomendaciones
+                        ? plan.recomendaciones.split(',')
+                        : [];
+
+                    planDiv.innerHTML = `
+                        <h2>Plan Nutricional</h2>
+
+                        <p><strong>Calorías:</strong> ${plan.calorias || 'N/A'}</p>
+
+                        <p><strong>Macros:</strong></p>
+                        <ul>
+                            <li>Proteínas: ${plan.macros.proteinas} g</li>
+                            <li>Grasas: ${plan.macros.grasas} g</li>
+                            <li>Carbohidratos: ${plan.macros.carbohidratos} g</li>
+                        </ul>
+
+                        <h3>Menú Diario</h3>
+                        <ul>
+                            ${menu.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+
+                        <h3>Snacks</h3>
+                        <ul>
+                            ${snacks.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+
+                        <h3>Recomendaciones</h3>
+                        <ul>
+                            ${recomendaciones.map(r => `<li>${r.trim()}</li>`).join('')}
+                        </ul>
+                    `;
+
                     planDiv.style.display = 'block';
                 } else {
                     planDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
                     planDiv.style.display = 'block';
                 }
             } catch (error) {
-                planDiv.innerHTML = `<div class="error">Ocurrió un error. Por favor, intenta de nuevo.</div>`;
+                console.error(error); // 👈 MUY IMPORTANTE
+
+                planDiv.innerHTML = `
+                    <div class="error">
+                        Ocurrió un error. Por favor, intenta de nuevo.
+                    </div>
+                `;
                 planDiv.style.display = 'block';
             } finally {
                 loading.style.display = 'none';

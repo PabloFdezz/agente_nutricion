@@ -14,12 +14,21 @@ Objetivo: {datos['objetivo']}
 Necesidades calóricas: {calorias} kcal
 Macronutrientes: {macros}
 
-Devuelve **solo un JSON válido** con la siguiente estructura:
+Devuelve **solo un JSON válido** con la siguiente estructura.
+NO incluyas texto antes ni después.
+NO uses markdown.
+NO uses comillas incorrectas.
+NO uses caracteres especiales como \n, \t, etc.
+El campo "menu" es obligatorio y debe contener al menos 3 comidas.
 {{
     "calorias": "...",
     "macros": "...",
-    "menu": "...",
-    "recomendaciones": "...",
+    "menu": [
+        "Desayuno: ...",
+        "Comida: ...",
+        "Cena: ..."
+    ]
+    "recomendaciones": ["A", "B", "C"],
     "snacks": ["...", "..."]
 }}
 """

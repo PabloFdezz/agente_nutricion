@@ -49,13 +49,32 @@ def nutricion():
         )
         respuesta_texto = completion.choices[0].message.content
 
-        # 5️⃣ Parsear JSON seguro
-        match = re.search(r"\{.*\}", respuesta_texto, re.DOTALL)
-        if not match:
-            return jsonify({"success": False, "error": "No se recibió JSON válido del modelo"})
-        plan_json = json.loads(match.group())
+        # 5️⃣ Limpiar respuesta antes de parsear
+        respuesta = completion.choices[0].message.content
 
-        return jsonify({"success": True, "plan": plan_json})
+        # Extraer JSON con regex (por si hay texto extra)
+        match = re.search(r"\{.*\}", respuesta, re.DOTALL)
+
+        if not match:
+            logging.error("No se encontró JSON en la respuesta del modelo")
+            return jsonify({
+                "success": False,
+                "error": "No se recibió JSON válido del modelo"
+            })
+
+        json_str = match.group(0)
+
+        # 6️⃣ Parseo con fallback 
+        try:
+            plan = json.loads(json_str)
+        except json.JSONDecodeError:
+            logging.error("JSON inválido recibido del modelo")
+            return jsonify({
+                "success": False,
+                "error": "Error procesando la respuesta del modelo"
+            })
+
+        return jsonify({"success": True, "plan": plan})
 
     except Exception as e:
         logging.error(f"Error en Groq: {str(e)}")

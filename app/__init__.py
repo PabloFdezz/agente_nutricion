@@ -10,11 +10,11 @@ load_dotenv()
 # Inicializar cliente Groq
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# Inicializar base de datos
-init_db()  
-
 def create_app():
     app = Flask(__name__)
+
+    with app.app_context():
+        init_db()
 
     # Registrar rutas
     from app.routes import bp
